@@ -1,0 +1,6 @@
+2025-03-11T15:39:51.704Z - GET /
+2025-03-11T15:39:56.036Z - GET /
+2025-03-11T17:47:22.131Z - GET /initialization
+2025-03-11T17:48:28.418Z - GET /initialization
+2025-03-11T17:48:35.288Z - POST /initialization
+2025-03-11T18:22:00.754Z - POST /initialization
