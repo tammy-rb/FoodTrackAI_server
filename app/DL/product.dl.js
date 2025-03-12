@@ -1,18 +1,6 @@
 
 import sql from './connection.js';
 
-/***
- * handling sql products table
- * product crud:
- * create
- * getById
- * getByName
- * getAll (can filter by category)
- * remove
- * update
- */
-
-//Product object
 class Product {
   constructor(product) {
     if (product) {
@@ -23,107 +11,120 @@ class Product {
       this.measure_by_unit = product.measure_by_unit;
     }
   }
-}
 
-Product.create = (newProduct, result) => {
-  sql.query("INSERT INTO products SET ?", newProduct, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-    console.log("Created product: ", { id: res.insertId, ...newProduct });
-    result(null, { id: res.insertId, ...newProduct });
-  });
-};
-
-
-Product.findById = (id, result) => {
-  sql.query("SELECT * FROM products WHERE id = ?", id, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-    if (res.length) {
-      console.log("Found product: ", res[0]);
-      result(null, res[0]);
-      return;
-    }
-    result({ kind: "not_found" }, null);
-  });
-};
-
-Product.findByName = (name, result) => {
-  sql.query("SELECT * FROM products WHERE name = ?", name, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-    if (res.length) {
-      console.log("Found product: ", res[0]);
-      result(null, res[0]);
-      return;
-    }
-    result({ kind: "not_found" }, null);
-  });
-};
-
-/**
- * get all products. 
- * or get all products in specific category
- */
-Product.getAll = (category, result) => {
-  let query = "SELECT * FROM products";
-  if (category) {
-    query += ` WHERE category = '${category}'`;
+  // Modify create method to return a Promise
+  static create(newProduct) {
+    return new Promise((resolve, reject) => {
+      sql.query("INSERT INTO products SET ?", newProduct, (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        console.log("Created product: ", { id: res.insertId, ...newProduct });
+        resolve({ id: res.insertId, ...newProduct });
+      });
+    });
   }
-  sql.query(query, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-    console.log("Products: ", res);
-    result(null, res);
-  });
-};
 
-Product.update = (id, product, result) => {
-  sql.query(
-    "UPDATE products SET name = ?, image_url = ?, category = ?, unit = ?, measure_by_unit = ? WHERE id = ?",
-    [product.name, product.image_url, product.category, product.unit, product.measure_by_unit, id],
-    (err, res) => {
-      if (err) {
-        console.log("error: ", err);
-        result(err, null);
-        return;
-      }
-      if (res.affectedRows == 0) {
-        result({ kind: "not_found" }, null);
-        return;
-      }
-      console.log("Updated product: ", { id, ...product });
-      result(null, { id, ...product });
-    }
-  );
-};
+  // Modify findById method to return a Promise
+  static findById(id) {
+    return new Promise((resolve, reject) => {
+      sql.query("SELECT * FROM products WHERE id = ?", id, (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        if (res.length) {
+          console.log("Found product: ", res[0]);
+          resolve(res[0]);
+        } else {
+          reject({ kind: "not_found" });
+        }
+      });
+    });
+  }
 
-Product.remove = (id, result) => {
-  sql.query("DELETE FROM products WHERE id = ?", id, (err, res) => {
-    if (err) {
-      console.log("error: ", err);
-      result(err, null);
-      return;
-    }
-    if (res.affectedRows == 0) {
-      result({ kind: "not_found" }, null);
-      return;
-    }
-    console.log("Deleted product with id: ", id);
-    result(null, true);
-  });
-};
+  // Modify findByName method to return a Promise
+  static findByName(name) {
+    return new Promise((resolve, reject) => {
+      sql.query("SELECT * FROM products WHERE name = ?", name, (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        if (res.length) {
+          console.log("Found product: ", res[0]);
+          resolve(res[0]);
+        } else {
+          reject({ kind: "not_found" });
+        }
+      });
+    });
+  }
+
+  // Modify getAll method to return a Promise
+  static getAll(category) {
+    return new Promise((resolve, reject) => {
+      let query = "SELECT * FROM products";
+      if (category) {
+        query += ` WHERE category = '${category}'`;
+      }
+      sql.query(query, (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        console.log("Products: ", res);
+        resolve(res);
+      });
+    });
+  }
+
+  // Modify update method to return a Promise
+  static update(id, product) {
+    return new Promise((resolve, reject) => {
+      sql.query(
+        "UPDATE products SET name = ?, image_url = ?, category = ?, unit = ?, measure_by_unit = ? WHERE id = ?",
+        [product.name, product.image_url, product.category, product.unit, product.measure_by_unit, id],
+        (err, res) => {
+          if (err) {
+            console.log("error: ", err);
+            reject(err);
+            return;
+          }
+          if (res.affectedRows == 0) {
+            reject({ kind: "not_found" });
+            return;
+          }
+          console.log("Updated product: ", { id, ...product });
+          resolve({ id, ...product });
+        }
+      );
+    });
+  }
+
+  // Modify remove method to return a Promise
+  static remove(id) {
+    return new Promise((resolve, reject) => {
+      sql.query("DELETE FROM products WHERE id = ?", id, (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        if (res.affectedRows == 0) {
+          reject({ kind: "not_found" });
+          return;
+        }
+        console.log("Deleted product with id: ", id);
+        resolve(true);
+      });
+    });
+  }
+}
 
 export default Product;
