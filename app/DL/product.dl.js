@@ -2,6 +2,7 @@
 import sql from './connection.js';
 
 /***
+ * handling sql products table
  * product crud:
  * create
  * getById
@@ -121,8 +122,29 @@ Product.remove = (id, result) => {
       return;
     }
     console.log("Deleted product with id: ", id);
-    result(null, res);
+    result(null, true);
   });
+};
+
+//add new image to a product.
+Product.updateImage = (id, imageUrl, result) => {
+  sql.query(
+    "UPDATE products SET image_url = ? WHERE id = ?",
+    [imageUrl, id],
+    (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        result(err, null);
+        return;
+      }
+      if (res.affectedRows == 0) {
+        result({ kind: "not_found" }, null);
+        return;
+      }
+      console.log("Updated product with img: ", { id, ...product });
+      result(null, { id, ...product });
+    }
+  );
 };
 
 export default Product;
