@@ -19,7 +19,7 @@ const createProductsTable = function() {
     // Create the products table
     var sql = `CREATE TABLE IF NOT EXISTS products (
       id INT PRIMARY KEY AUTO_INCREMENT,
-      name VARCHAR(255) NOT NULL,
+      name VARCHAR(255) UNIQUE NOT NULL,
       image_url VARCHAR(255),
       category VARCHAR(255),
       unit VARCHAR(50),
@@ -43,14 +43,17 @@ const createProductsTable = function() {
         product.measure_by_unit
       ], function(err, result) {
         if (err) throw err;
-        console.log(`Product inserted with id: ${result.insertId}`);
+        if (result.affectedRows > 0) {
+          console.log(`Inserted product: ${product.name}`);
+        }
       });
     });
 
     // Print the table to verify the records
-    con.query("SELECT * FROM products", function(err, result, fields) {
+    con.query("SELECT * FROM products", function(err, result) {
       if (err) throw err;
-      console.log(result);
+      console.log("Products Table Data:", result);
+
     });
   });
 };

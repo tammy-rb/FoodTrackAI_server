@@ -13,7 +13,10 @@ const clearDBTables = function(){
         if (err) throw err;
         console.log("(deleted products table successfully");
       });
-      
+      con.query("drop table if exists meals", function (err, result, fields) {
+        if (err) throw err;
+        console.log("(deleted meals table successfully");
+      });
     });
 }
 

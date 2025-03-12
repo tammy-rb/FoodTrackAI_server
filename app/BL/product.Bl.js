@@ -1,6 +1,15 @@
 import Product from '../DL/product.dl.js'
 import FileHandler from '../utils/fileHandler.js'
 
+/**
+ * product service:
+ * creat
+ * update by id (name still the same)
+ * remove
+ * get all
+ * get by id
+ * get by name
+ */
 class ProductCrud {
 
   static async createProduct(req, res) {
@@ -8,9 +17,16 @@ class ProductCrud {
     if (!req.body.name) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+    // Trim and lowercase the name to prevent case sensitivity issues
+    const productName = req.body.name.trim().toLowerCase();
+
+    const products_list = await Product.getAll();
+    if(products_list.find((product) => productName === req.body.name)){
+      return res.status(400).json({ error: 'Product already exists' });
+    }
     try {
       const product = new Product({
-        name: req.body.name,
+        name: productName,
         category: req.body.category,
         unit: req.body.unit,
         measure_by_unit: req.body.measure_by_unit,
@@ -66,6 +82,7 @@ class ProductCrud {
     }
   }
 
+  //update a product. name still the same
   static async updateProduct(req, res) {
     try {
       const productId = req.params.id;
@@ -77,7 +94,7 @@ class ProductCrud {
       }
 
       const updatedProduct = new Product({
-        name: req.body.name,
+        name: existingProduct.name,
         category: req.body.category,
         unit: req.body.unit,
         measure_by_unit: req.body.measure_by_unit,
