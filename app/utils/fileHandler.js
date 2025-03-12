@@ -16,7 +16,7 @@ const fileHandler = {
     try {
       if (!file) return null;
       //path of directory to store the new filr
-      const publicPath = path.join(__dirname, '../../public', folder); 
+      const publicPath = path.join(__dirname, '../../../public', folder); 
       
       // Ensure directory exists
       if (!fs.existsSync(publicPath)) {
@@ -42,7 +42,7 @@ const fileHandler = {
     try {
       if (!filePath) return false;
 
-      const fullPath = path.join(__dirname, '../../public', filePath);
+      const fullPath = path.join(__dirname, '../../../public', filePath);
       await fs.promises.unlink(fullPath);
 
       return true;

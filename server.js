@@ -3,6 +3,7 @@ import bodyParser  from 'body-parser';
 import cors from 'cors';
 import multer from 'multer';
 import fs from 'fs';
+import productRoute from './app/routes/product.routes.js'
 
 import initRoute from './app/routes/initialization.route.js';
 
@@ -39,6 +40,7 @@ app.use((req, res, next) => {
 });
 
 initRoute(app);
+app.use('/api/products', productRoute);
 
 // Define a simple GET route
 app.get("/", (req, res) => {
