@@ -91,7 +91,6 @@ class ProductCrud {
   static async updateProduct(req, res) {
     try {
       const productId = req.params.id;
-      const existingProduct = null;
       Product.findById(productId, (err, existingProduct) => {
         if (err) {
           if (err.kind === "not_found") {
@@ -102,7 +101,7 @@ class ProductCrud {
 
         //delete old file if theres new one
         if (req.file && existingProduct.image_url) {
-          await FileHandler.deleteFile( `uploads\product\\${existingProduct.image_url}`);
+          FileHandler.deleteFile( `uploads\product\\${existingProduct.image_url}`);
         }});
 
         //make new updated product. after we found the old one.
@@ -112,7 +111,7 @@ class ProductCrud {
           unit: req.body.unit,
           measure_by_unit: req.body.measure_by_unit,
           // If an image is provided, store it in 'products' folder
-          image_url: req.files ? req.file?.filename :  null
+          image_url: req.file ? req.file?.filename :  null
         });
 
         Product.update(productId, updatedProduct, (updateErr, result) => {
@@ -142,7 +141,7 @@ class ProductCrud {
         }
 
         if (existingProduct.image_url) {
-          await FileHandler.deleteFile( `uploads\products\\${existingProduct.image_url}`);
+          FileHandler.deleteFile( `uploads\products\\${existingProduct.image_url}`);
         }
 
         Product.remove(productId, (removeErr, success) => {
