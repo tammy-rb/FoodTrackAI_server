@@ -49,7 +49,7 @@ const FileUpload = (folderPath, filterBy, fileKey, maxCount = 1, maxFileSize = 1
             });
         },
         filename: (req, file, cb) => {
-            cb(null, `${req.body.name}_${Date.now()}${path.extname(file.originalname)}`); // Define how files should be named
+            cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`); // Define how files should be named
         }
     });
 

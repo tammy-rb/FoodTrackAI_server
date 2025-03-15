@@ -5,7 +5,7 @@ import FileUpload from '../middlewar/multerConfig.js';
 const router = express.Router();
 
 // Middleware to handle file upload in specific folder
-const uploadMiddleware = FileUpload('uploads/products', ['image/jpeg', 'image/png'], 'image_url', 1);
+const uploadMiddleware = FileUpload('uploads/products', ['image/jpeg', 'image/png'], 'image_url', 1, 5);
 
 // Create a product (with image upload)
 router.post('/', uploadMiddleware, ProductCrud.createProduct);

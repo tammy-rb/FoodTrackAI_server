@@ -5,6 +5,10 @@ class Meal {
     if (meal) {
       this.products = meal.products;
       this.description = meal.description;
+      this.picture_before = meal.picture_before;
+      this.picture_after = meal.picture_after;
+      this.weight_before = meal.weight_before;
+      this.weight_after = meal.weight_after;
     }
   }
 
@@ -65,7 +69,7 @@ class Meal {
   * Get all meals (optionally filter by products)
   * @param {String} products : a product list with , as separator
   * like product1,product2,.. get all meals have these products
-  * @returns all or filterd products
+  * @returns all or filtered products
   */
 static getAll(products) {
   return new Promise((resolve, reject) => {
@@ -90,13 +94,12 @@ static getAll(products) {
   });
 }
 
-
   // Update a meal
   static update(id, meal) {
     return new Promise((resolve, reject) => {
       sql.query(
-        "UPDATE meals SET products = ?, description = ? WHERE id = ?",
-        [meal.products, meal.description, id],
+        "UPDATE meals SET products = ?, description = ?, picture_before = ?, picture_after = ?, weight_before = ?, weight_after = ? WHERE id = ?",
+        [meal.products, meal.description, meal.picture_before, meal.picture_after, meal.weight_before, meal.weight_after, id],
         (err, res) => {
           if (err) {
             console.log("error: ", err);

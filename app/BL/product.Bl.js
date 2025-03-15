@@ -13,6 +13,7 @@ import FileHandler from '../utils/fileHandler.js'
 class ProductCrud {
 
   static async createProduct(req, res) {
+
     // Ensure product data is valid (basic check)
     if (!req.body.name) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -21,7 +22,7 @@ class ProductCrud {
     const productName = req.body.name.trim().toLowerCase();
 
     const products_list = await Product.getAll();
-    if(products_list.find((product) => productName === req.body.name)){
+    if(products_list.find((product) => productName === product.name)){
       return res.status(400).json({ error: 'Product already exists' });
     }
     try {

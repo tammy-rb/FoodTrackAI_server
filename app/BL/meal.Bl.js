@@ -1,4 +1,5 @@
 import Meal from '../DL/meal.dl.js';
+import FileHandler from '../utils/fileHandler.js'
 
 /**
  * Meal service:
@@ -11,24 +12,44 @@ import Meal from '../DL/meal.dl.js';
  */
 class MealCrud {
 
+  //create new meal. notice 2 images are saved as "before__timestamp", "after_timestamp".
+  //maybe if duplicates accour (2 images the same time), add a hash of the products to the name. 
   static async createMeal(req, res) {
-    if (!req.body.products) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-    
     try {
+      // Ensure required fields are provided
+      if (!req.body.products || !req.body.weight_before || !req.body.weight_after) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      const { products, description = null, weight_before, weight_after } = req.body;
+      const pictures = req.files ?? [];
+
+      // Check if two images (before and after) are provided
+      if (pictures.length < 2) {
+        return res.status(400).json({ error: 'Missing required fields: image_before, image_after' });
+      }
+
+      // Extract file paths
+      const picture_before = pictures[0]?.filename || null;
+      const picture_after = pictures[1]?.filename || null;
+
+      // Create new meal object
       const meal = new Meal({
-        products: req.body.products.toLowerCase(),
-        description: req.body.description
+        products,
+        description,
+        weight_before,
+        weight_after,
+        picture_before,
+        picture_after
       });
 
+      // Save the new meal in the database
       const newMeal = await Meal.create(meal);
       res.status(201).json(newMeal);
     } catch (error) {
-      console.error('Error creating meal:', error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: 'Error creating meal', details: error.message });
     }
-  }
+  };
 
   static async getMealById(req, res) {
     try {
@@ -58,11 +79,42 @@ class MealCrud {
   static async updateMeal(req, res) {
     try {
       const mealId = req.params.id;
-      const updatedMeal = new Meal({
-        products: req.body.products.toLowerCase(),
-        description: req.body.description
-      });
 
+      // Retrieve existing meal
+      const existingMeal = await Meal.findById(mealId);
+
+      // Prepare the updated fields
+      const updatedMeal = {
+        products: req.body.products || null,
+        description: req.body.description || null,
+        weight_before: req.body.weight_before || null,
+        weight_after: req.body.weight_after || null
+      };
+
+      if (!updatedMeal.products || !updatedMeal.weight_after || !updatedMeal.weight_before){
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Handle new images (before and after)
+      const pictures = req.files || [];
+       // Check if two images (before and after) are provided
+       if (pictures.length < 2) {
+        return res.status(400).json({ error: 'Missing required fields: image before, image after' });
+      }
+
+      // Delete files if it exists
+      if (existingMeal.picture_before) {
+        await FileHandler.deleteFile(`uploads/meals/${existingMeal.picture_before}`);
+      }
+      if (existingMeal.picture_after) {
+        await FileHandler.deleteFile(`uploads/meals/${existingMeal.picture_after}`);
+      }
+
+      // Update the meal with new image 
+      updatedMeal.picture_before = pictures[0]?.filename || null;
+      updatedMeal.picture_after = pictures[1]?.filename || null;
+   
+      // Update the meal in the database
       const updated = await Meal.update(mealId, updatedMeal);
       res.json(updated);
     } catch (error) {
@@ -74,8 +126,18 @@ class MealCrud {
   static async removeMeal(req, res) {
     try {
       const mealId = req.params.id;
+      const existingMeal = await Meal.findById(mealId);
+
+      // Delete files if it exists
+      if (existingMeal.picture_before) {
+        await FileHandler.deleteFile(`uploads/meals/${existingMeal.picture_before}`);
+      }
+      if (existingMeal.picture_after) {
+        await FileHandler.deleteFile(`uploads/meals/${existingMeal.picture_after}`);
+      }
       await Meal.remove(mealId);
       res.json({ message: 'Meal deleted successfully' });
+
     } catch (error) {
       if (error.kind === 'not_found') {
         return res.status(404).json({ error: 'Meal not found' });
