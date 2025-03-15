@@ -1,5 +1,6 @@
 import Meal from '../DL/meal.dl.js';
 import FileHandler from '../utils/fileHandler.js'
+import Product from '../DL/product.dl.js';
 
 /**
  * Meal service:
@@ -145,6 +146,63 @@ class MealCrud {
       console.error('Error deleting meal:', error);
       res.status(500).json({ error: error.message });
     }
+  }
+
+  // Fetch meal products and categorize them
+  /**
+ * Retrieves the products associated with a specific meal, categorizes them based on their existence 
+ * in the database, and returns an object with two arrays: 
+ * - `foundProducts`: contains full product objects retrieved from the database.
+ * - `notFoundProducts`: contains only the names of products that were not found.
+ */
+static async getMealProducts(req, res) {
+  try {
+    const meal_id = req.params.id; // Get meal ID from request parameters
+    const meal = await Meal.findById(meal_id); // Fetch meal details from the database
+
+    if (!meal) {
+      return res.status(404).json({ error: "Meal not found" });
+    }
+
+    const mealProducts = meal.products.split('#'); // Convert product string into an array
+    const categorizedProducts = await MealCrud.categorizeMealProducts(mealProducts); // Categorize products
+
+    res.json(categorizedProducts);
+  } catch (error) {
+    console.error('Error fetching meal products:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+/**
+* Categorizes an array of product names into:
+* - `foundProducts`: an array of product objects retrieved from the database.
+* - `notFoundProducts`: an array of product names that were not found in the database.
+*/
+static async categorizeMealProducts(mealProducts) {
+  const foundProducts = [];
+  const notFoundProducts = [];
+
+  for (let product of mealProducts) {
+    try {
+      product = product.trim(); // Remove unnecessary spaces
+      const productData = await Product.findByName(product); // Search for product by name
+
+      if (productData) {
+        foundProducts.push(productData); // Add found product object
+      } else {
+        notFoundProducts.push(product); // Add only the product name if not found
+      }
+    } catch (error) {
+      if (error.kind === "not_found") {
+        notFoundProducts.push(product); // If not found, store only the product name
+      } else {
+        console.error("Error fetching product:", error);
+      }
+    }
+  }
+
+  return { foundProducts, notFoundProducts };
   }
 }
 
