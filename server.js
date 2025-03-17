@@ -5,6 +5,7 @@ import multer from 'multer';
 import fs from 'fs';
 import productRoute from './app/routes/product.routes.js'
 import mealRoute from './app/routes/meal.routes.js'
+import mealProductRoute from './app/routes/meal_products.route.js'
 
 import initRoute from './app/routes/initialization.route.js';
 
@@ -43,6 +44,7 @@ app.use((req, res, next) => {
 initRoute(app);
 app.use('/products', productRoute);
 app.use('/meals', mealRoute);
+app.use('/meals-products', mealProductRoute);
 
 // Define a simple GET route
 app.get("/", (req, res) => {

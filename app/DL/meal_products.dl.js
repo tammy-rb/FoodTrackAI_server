@@ -10,124 +10,114 @@ class MealProduct {
     }
   }
 
-  // Create a new meal-product association
   static create(newMealProduct) {
     return new Promise((resolve, reject) => {
       sql.query("INSERT INTO meal_products SET ?", newMealProduct, (err, res) => {
         if (err) {
-          console.log("Error: ", err);
+          console.log("error: ", err);
           reject(err);
           return;
         }
-        console.log("Created meal-product association: ", { id: res.insertId, ...newMealProduct });
+        console.log("Created meal_product: ", { id: res.insertId, ...newMealProduct });
         resolve({ id: res.insertId, ...newMealProduct });
       });
     });
   }
 
-  // Get all meal-product associations
-  static getAll() {
+  static get(meal_id, product_id) {
     return new Promise((resolve, reject) => {
-      sql.query("SELECT * FROM meal_products", (err, res) => {
-        if (err) {
-          console.log("Error: ", err);
-          reject(err);
-          return;
+      sql.query(
+        "SELECT * FROM meal_products WHERE meal_id = ? AND product_id = ?",
+        [meal_id, product_id],
+        (err, res) => {
+          if (err) {
+            console.log("error: ", err);
+            reject(err);
+            return;
+          }
+          if (res.length) {
+            console.log("Found meal_products for meal_id: ", meal_id, " and product_id: ", product_id, res);
+            resolve(res);
+          } else {
+            reject({ kind: "not_found" });
+          }
         }
-        console.log("Meal-Products: ", res);
-        resolve(res);
-      });
+      );
     });
   }
 
-  // Get all meal-products for a specific meal
-  static getByMealId(meal_id) {
+  static findByMealId(meal_id) {
     return new Promise((resolve, reject) => {
       sql.query("SELECT * FROM meal_products WHERE meal_id = ?", meal_id, (err, res) => {
         if (err) {
-          console.log("Error: ", err);
+          console.log("error: ", err);
           reject(err);
           return;
         }
-        console.log("Meal-Products for meal ID " + meal_id + ": ", res);
-        resolve(res);
+        if (res.length) {
+          console.log("Found meal_products for meal_id: ", res);
+          resolve(res);
+        } else {
+          reject({ kind: "not_found" });
+        }
       });
     });
   }
 
-  // Get all meal-products for a specific product
-  static getByProductId(product_id) {
+  static findByProductId(product_id) {
     return new Promise((resolve, reject) => {
       sql.query("SELECT * FROM meal_products WHERE product_id = ?", product_id, (err, res) => {
         if (err) {
-          console.log("Error: ", err);
+          console.log("error: ", err);
           reject(err);
           return;
         }
-        console.log("Meal-Products for product ID " + product_id + ": ", res);
-        resolve(res);
-      });
-    });
-  }
-
-  // Remove all meal-products associated with a specific meal
-  static removeByMealId(meal_id) {
-    return new Promise((resolve, reject) => {
-      sql.query("DELETE FROM meal_products WHERE meal_id = ?", meal_id, (err, res) => {
-        if (err) {
-          console.log("Error: ", err);
-          reject(err);
-          return;
-        }
-        console.log("Deleted meal-products for meal ID: ", meal_id);
-        resolve(true);
-      });
-    });
-  }
-
-  // Remove all meal-products associated with a specific product
-  static removeByProductId(product_id) {
-    return new Promise((resolve, reject) => {
-      sql.query("DELETE FROM meal_products WHERE product_id = ?", product_id, (err, res) => {
-        if (err) {
-          console.log("Error: ", err);
-          reject(err);
-          return;
-        }
-        console.log("Deleted meal-products for product ID: ", product_id);
-        resolve(true);
-      });
-    });
-  }
-
-  // Remove a specific meal-product association
-  static remove(meal_id, product_id) {
-    return new Promise((resolve, reject) => {
-      sql.query("DELETE FROM meal_products WHERE meal_id = ? AND product_id = ?", [meal_id, product_id], (err, res) => {
-        if (err) {
-          console.log("Error: ", err);
-          reject(err);
-          return;
-        }
-        if (res.affectedRows == 0) {
+        if (res.length) {
+          console.log("Found meal_products for product_id: ", res);
+          resolve(res);
+        } else {
           reject({ kind: "not_found" });
-          return;
         }
-        console.log("Deleted meal-product with meal_id: " + meal_id + " and product_id: " + product_id);
-        resolve(true);
       });
     });
   }
 
-  // Update the weight before and after for a specific meal-product association
-  static update(meal_id, product_id, updatedData) {
+  static getAllByMeal(meal_id) {
+    return new Promise((resolve, reject) => {
+      sql.query("SELECT * FROM meal_products WHERE meal_id = ?", meal_id, (err, mealProducts) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        resolve(mealProducts);
+      });
+    });
+  }
+
+  static getAllByProduct(product_id) {
+    return new Promise((resolve, reject) => {
+      sql.query("SELECT * FROM meal_products WHERE product_id = ?", product_id, (err, mealProducts) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        resolve(mealProducts);
+      });
+    });
+  }
+
+  static update(meal_id, product_id, mealProduct) {
     return new Promise((resolve, reject) => {
       sql.query(
-        "UPDATE meal_products SET weight_before = ?, weight_after = ? WHERE meal_id = ? AND product_id = ?",
-        [updatedData.weight_before, updatedData.weight_after, meal_id, product_id],
+        `UPDATE meal_products 
+         SET weight_before = ?, weight_after = ? 
+         WHERE meal_id = ? AND product_id = ?`,
+        [mealProduct.weight_before, mealProduct.weight_after, meal_id, product_id],
         (err, res) => {
           if (err) {
-            console.log("Error: ", err);
+            console.log("error: ", err);
             reject(err);
             return;
           }
@@ -135,10 +125,56 @@ class MealProduct {
             reject({ kind: "not_found" });
             return;
           }
-          console.log("Updated meal-product: ", { meal_id, product_id, ...updatedData });
-          resolve({ meal_id, product_id, ...updatedData });
+          console.log("Updated meal_product: ", { meal_id, product_id, ...mealProduct });
+          resolve({ meal_id, product_id, ...mealProduct });
         }
       );
+    });
+  }
+
+  static remove(meal_id, product_id) {
+    return new Promise((resolve, reject) => {
+      sql.query("DELETE FROM meal_products WHERE meal_id = ? AND product_id = ?", [meal_id, product_id], (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        if (res.affectedRows == 0) {
+          reject({ kind: "not_found" });
+          return;
+        }
+        console.log("Deleted meal_product with meal_id: ", meal_id, " and product_id: ", product_id);
+        resolve(true);
+      });
+    });
+  }
+
+  static removeAllByMeal(meal_id) {
+    return new Promise((resolve, reject) => {
+      sql.query("DELETE FROM meal_products WHERE meal_id = ?", meal_id, (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        console.log("Deleted all meal_products for meal_id: ", meal_id);
+        resolve(true);
+      });
+    });
+  }
+
+  static removeAllByProduct(product_id) {
+    return new Promise((resolve, reject) => {
+      sql.query("DELETE FROM meal_products WHERE product_id = ?", product_id, (err, res) => {
+        if (err) {
+          console.log("error: ", err);
+          reject(err);
+          return;
+        }
+        console.log("Deleted all meal_products for product_id: ", product_id);
+        resolve(true);
+      });
     });
   }
 }
