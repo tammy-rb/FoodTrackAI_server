@@ -22,6 +22,4 @@ router.put('/:id', uploadImages, MealCrud.updateMeal);
 // Delete a meal by ID
 router.delete('/:id', MealCrud.removeMeal);
 
-router.get('/products/:id', MealCrud.getMealProducts)
-
 export default router;
