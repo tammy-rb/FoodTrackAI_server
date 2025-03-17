@@ -7,26 +7,111 @@ import con from "./connection.js";
  * The meal contains the unique names of the products.
  */
 
+const image_before = 'public/uploads/meals/meal_before.jpg'
+const image_after = 'public/uploads/meals/meal_after.jpg'
+
 const meals = [
   { 
     "id": 1, 
     "products": "milk#potato#corn", 
     "description": "Mostly, initial weight is 1200 grams",
-    "picture_before": "before1.jpg",
-    "picture_after": "after1.jpg",
+    "picture_before": image_before,
+    "picture_after": image_after,
     "weight_before": 1200,
     "weight_after": 800
   },
   { 
     "id": 2, 
-    "products": "apple#orange#banana", 
-    "description": "Mostly, one fruit from any",
-    "picture_before": "before2.jpg",
-    "picture_after": "after2.jpg",
+    "products": "bread#cheese#butter", 
+    "description": "Cheese sandwich with buttered bread",
+    "picture_before": image_before,
+    "picture_after": image_after,
     "weight_before": 500,
-    "weight_after": 350
+    "weight_after": 300
+  },
+  { 
+    "id": 3, 
+    "products": "rice#chicken#carrot", 
+    "description": "A classic chicken and rice dish with carrots",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 1000,
+    "weight_after": 700
+  },
+  { 
+    "id": 4, 
+    "products": "fish#rice#apple", 
+    "description": "Grilled fish served with rice and apple slices",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 900,
+    "weight_after": 600
+  },
+  { 
+    "id": 5, 
+    "products": "banana#milk#eggs", 
+    "description": "Banana milkshake with eggs for protein",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 750,
+    "weight_after": 500
+  },
+  { 
+    "id": 6, 
+    "products": "carrot#corn#butter", 
+    "description": "A buttery corn and carrot mix",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 600,
+    "weight_after": 400
+  },
+  { 
+    "id": 7, 
+    "products": "eggs#cheese#bread", 
+    "description": "Scrambled eggs with cheese on bread",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 700,
+    "weight_after": 450
+  },
+  { 
+    "id": 8, 
+    "products": "potato#chicken#butter", 
+    "description": "Baked potato with grilled chicken and butter",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 1100,
+    "weight_after": 750
+  },
+  { 
+    "id": 9, 
+    "products": "apple#banana#milk", 
+    "description": "A simple fruit and milk meal",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 650,
+    "weight_after": 450
+  },
+  { 
+    "id": 10, 
+    "products": "bread#fish#carrot", 
+    "description": "Grilled fish with carrot slices on bread",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 850,
+    "weight_after": 550
+  },
+  { 
+    "id": 11, 
+    "products": "rice#corn#chicken", 
+    "description": "A simple rice meal with corn and chicken",
+    "picture_before": image_before,
+    "picture_after": image_after,
+    "weight_before": 950,
+    "weight_after": 700
   }
 ];
+
 
 const createMealsTable = () => {
   con.connect((err) => {

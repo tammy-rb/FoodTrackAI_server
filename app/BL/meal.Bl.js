@@ -11,6 +11,9 @@ import Product from '../DL/product.dl.js';
  * Get by ID
  * Get by products
  */
+
+const path_to_files = 'public/uploads/meals/';
+
 class MealCrud {
 
   //create new meal. notice 2 images are saved as "before__timestamp", "after_timestamp".
@@ -31,8 +34,8 @@ class MealCrud {
       }
 
       // Extract file paths
-      const picture_before = pictures[0]?.filename || null;
-      const picture_after = pictures[1]?.filename || null;
+      const picture_before =  path_to_files + pictures[0]?.filename || null;
+      const picture_after = path_to_files + pictures[1]?.filename || null;
 
       // Create new meal object
       const meal = new Meal({
@@ -105,15 +108,15 @@ class MealCrud {
 
       // Delete files if it exists
       if (existingMeal.picture_before) {
-        await FileHandler.deleteFile(`uploads/meals/${existingMeal.picture_before}`);
+        await FileHandler.deleteFile(existingMeal.picture_before);
       }
       if (existingMeal.picture_after) {
-        await FileHandler.deleteFile(`uploads/meals/${existingMeal.picture_after}`);
+        await FileHandler.deleteFile(existingMeal.picture_after);
       }
 
       // Update the meal with new image 
-      updatedMeal.picture_before = pictures[0]?.filename || null;
-      updatedMeal.picture_after = pictures[1]?.filename || null;
+      updatedMeal.picture_before = path_to_files + pictures[0]?.filename || null;
+      updatedMeal.picture_after =  path_to_files + pictures[1]?.filename || null;
    
       // Update the meal in the database
       const updated = await Meal.update(mealId, updatedMeal);
@@ -131,10 +134,10 @@ class MealCrud {
 
       // Delete files if it exists
       if (existingMeal.picture_before) {
-        await FileHandler.deleteFile(`uploads/meals/${existingMeal.picture_before}`);
+        await FileHandler.deleteFile(existingMeal.picture_before);
       }
       if (existingMeal.picture_after) {
-        await FileHandler.deleteFile(`uploads/meals/${existingMeal.picture_after}`);
+        await FileHandler.deleteFile(existingMeal.picture_after);
       }
       await Meal.remove(mealId);
       res.json({ message: 'Meal deleted successfully' });

@@ -10,6 +10,8 @@ import FileHandler from '../utils/fileHandler.js'
  * get by id
  * get by name
  */
+const path_to_files = 'public/uploads/products/'
+
 class ProductCrud {
 
   static async createProduct(req, res) {
@@ -31,7 +33,7 @@ class ProductCrud {
         category: req.body.category,
         unit: req.body.unit,
         measure_by_unit: req.body.measure_by_unit,
-        image_url: req.file ? req.file.filename : null
+        image_url: req.file ? path_to_files + req.file.filename : null
       });
 
       // Create product in DL layer
@@ -91,7 +93,7 @@ class ProductCrud {
 
       // Delete old image if it exists and a new one is uploaded
       if (req.file && existingProduct.image_url) {
-        await FileHandler.deleteFile(`uploads/products/${existingProduct.image_url}`);
+        await FileHandler.deleteFile(existingProduct.image_url);
       }
 
       const updatedProduct = new Product({
@@ -99,7 +101,7 @@ class ProductCrud {
         category: req.body.category,
         unit: req.body.unit,
         measure_by_unit: req.body.measure_by_unit,
-        image_url: req.file ? req.file.filename : null
+        image_url: req.file ? path_to_files + req.file.filename : null
       });
 
       const updated = await Product.update(productId, updatedProduct);
@@ -118,7 +120,7 @@ class ProductCrud {
 
       // Delete file if it exists
       if (existingProduct.image_url) {
-        await FileHandler.deleteFile(`uploads/products/${existingProduct.image_url}`);
+        await FileHandler.deleteFile(existingProduct.image_url);
       }
 
       await Product.remove(productId);
