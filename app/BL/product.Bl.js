@@ -10,7 +10,7 @@ import FileHandler from '../utils/fileHandler.js'
  * get by id
  * get by name
  */
-const path_to_files = 'public/uploads/products/'
+const path_to_files = 'uploads/products/'
 
 class ProductCrud {
 
@@ -23,7 +23,9 @@ class ProductCrud {
     // Trim and lowercase the name to prevent case sensitivity issues
     const productName = req.body.name.trim().toLowerCase();
 
-    const products_list = await Product.getAll();
+    const products_list_Response = await Product.getAll(null, 1, Infinity);
+    const products_list = products_list_Response.products;
+
     if(products_list.find((product) => productName === product.name)){
       return res.status(400).json({ error: 'Product already exists' });
     }
@@ -77,13 +79,16 @@ class ProductCrud {
   static async getAllProducts(req, res) {
     try {
       const category = req.query.category;
-      const products = await Product.getAll(category);
+      const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
+      const limit = parseInt(req.query.limit) || 10;  // Default to limit 10 if not provided
+  
+      const products = await Product.getAll(category, page, limit);
       res.json(products);
     } catch (error) {
       console.error('Error fetching all products:', error);
       res.status(500).json({ error: error.message });
     }
-  }
+  }  
 
   //update a product. name still the same
   static async updateProduct(req, res) {

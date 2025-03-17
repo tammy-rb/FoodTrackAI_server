@@ -12,7 +12,7 @@ import Product from '../DL/product.dl.js';
  * Get by products
  */
 
-const path_to_files = 'public/uploads/meals/';
+const path_to_files = 'uploads/meals/';
 
 class MealCrud {
 

@@ -7,7 +7,7 @@ import { FOOD_CATEGORIES } from '../app/globals.js';
  * if success - print its records
 */
 
-const my_image = 'public/uploads/products/milk.jpg'
+const my_image = 'uploads/products/milk.jpg'
 
 const products = [
   { "id": 1, "name": "milk", "image_url": my_image, "category": FOOD_CATEGORIES[1], "unit": "kg", "measure_by_unit": 300 },

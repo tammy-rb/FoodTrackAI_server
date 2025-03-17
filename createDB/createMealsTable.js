@@ -7,8 +7,8 @@ import con from "./connection.js";
  * The meal contains the unique names of the products.
  */
 
-const image_before = 'public/uploads/meals/meal_before.jpg'
-const image_after = 'public/uploads/meals/meal_after.jpg'
+const image_before = 'uploads/meals/meal_before.jpg'
+const image_after = 'uploads/meals/meal_after.jpg'
 
 const meals = [
   { 

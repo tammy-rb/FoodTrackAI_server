@@ -65,24 +65,55 @@ class Product {
     });
   }
 
-  // Modify getAll method to return a Promise
-  static getAll(category) {
+  // This function retrieves a paginated list of products from the 'products' table, 
+  // optionally filtered by category, and includes information about the total number 
+  // of products and the total pages available for pagination.
+  static getAll(category, page = 1, limit = 10) {
     return new Promise((resolve, reject) => {
       let query = "SELECT * FROM products";
       if (category) {
         query += ` WHERE category = '${category}'`;
       }
-      sql.query(query, (err, res) => {
+  
+      if (limit != Infinity){
+        const offset = (page - 1) * limit;
+        query += ` LIMIT ${limit} OFFSET ${offset}`;
+      }
+  
+      sql.query(query, (err, products) => {
         if (err) {
           console.log("error: ", err);
           reject(err);
           return;
         }
-        console.log("Products: ", res);
-        resolve(res);
+  
+        // Get the total count of products for pagination
+        let countQuery = "SELECT COUNT(*) AS total FROM products";
+        if (category) {
+          countQuery += ` WHERE category = '${category}'`;
+        }
+  
+        sql.query(countQuery, (err, countResult) => {
+          if (err) {
+            console.log("error: ", err);
+            reject(err);
+            return;
+          }
+          //number of all products
+          const total = countResult[0].total;
+          const totalPages = Math.ceil(total / limit);
+  
+          resolve({
+            products,
+            page,
+            totalPages,
+            total
+          });
+        });
       });
     });
   }
+  
 
   // Modify update method to return a Promise
   static update(id, product) {
