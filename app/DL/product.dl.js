@@ -4,15 +4,18 @@ import sql from './connection.js';
 class Product {
   constructor(product) {
     if (product) {
-      this.name = product.name;
-      this.image_url = product.image_url;
-      this.category = product.category;
-      this.unit = product.unit;
-      this.measure_by_unit = product.measure_by_unit;
+      this.name = product.name;  // Product name
+      this.sku = product.sku;  // Unique stock-keeping unit (SKU)
+      this.image_url = product.image_url;  // Path to product image
+      this.category = product.category;  // Product category (e.g., dairy, fruits, etc.)
+      this.dosage = product.dosage;  // Quantity per serving (e.g., 2 slices, 1 cup)
+      this.unit = product.unit;  // Unit of measure (e.g., cup, slice, kg)
+      this.weight_per_unit = product.weight_per_unit;  // Weight of a single unit in grams
+      this.calories_per_unit = product.calories_per_unit;  // Caloric value per unit
+      this.serving_style = product.serving_style;  // Serving style (e.g., ground, regular)
     }
   }
 
-  // Modify create method to return a Promise
   static create(newProduct) {
     return new Promise((resolve, reject) => {
       sql.query("INSERT INTO products SET ?", newProduct, (err, res) => {
@@ -27,7 +30,6 @@ class Product {
     });
   }
 
-  // Modify findById method to return a Promise
   static findById(id) {
     return new Promise((resolve, reject) => {
       sql.query("SELECT * FROM products WHERE id = ?", id, (err, res) => {
@@ -46,10 +48,9 @@ class Product {
     });
   }
 
-  // Modify findByName method to return a Promise
-  static findByName(name) {
+  static findBySku(sku) {
     return new Promise((resolve, reject) => {
-      sql.query("SELECT * FROM products WHERE name = ?", name, (err, res) => {
+      sql.query("SELECT * FROM products WHERE sku = ?", sku, (err, res) => {
         if (err) {
           console.log("error: ", err);
           reject(err);
@@ -114,13 +115,25 @@ class Product {
     });
   }
   
-
-  // Modify update method to return a Promise
   static update(id, product) {
     return new Promise((resolve, reject) => {
       sql.query(
-        "UPDATE products SET name = ?, image_url = ?, category = ?, unit = ?, measure_by_unit = ? WHERE id = ?",
-        [product.name, product.image_url, product.category, product.unit, product.measure_by_unit, id],
+        `UPDATE products 
+         SET name = ?, sku = ?, image_url = ?, category = ?, dosage = ?, unit = ?, 
+             weight_per_unit = ?, calories_per_unit = ?, serving_style = ? 
+         WHERE id = ?`,
+        [
+          product.name,
+          product.sku,
+          product.image_url,
+          product.category,
+          product.dosage,
+          product.unit,
+          product.weight_per_unit,
+          product.calories_per_unit,
+          product.serving_style,
+          id
+        ],
         (err, res) => {
           if (err) {
             console.log("error: ", err);
@@ -137,6 +150,7 @@ class Product {
       );
     });
   }
+  
 
   // Modify remove method to return a Promise
   static remove(id) {

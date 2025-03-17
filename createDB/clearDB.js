@@ -9,6 +9,10 @@ import con from "./connection.js"
 const clearDBTables = function(){
     con.connect(function(err) {
       if (err) throw err;
+      con.query("drop table if exists meal_products", function (err, result, fields) {
+        if (err) throw err;
+        console.log("(deleted meal_products table successfully");
+      });
       con.query("drop table if exists products", function (err, result, fields) {
         if (err) throw err;
         console.log("(deleted products table successfully");

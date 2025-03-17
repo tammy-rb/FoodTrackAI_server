@@ -1,28 +1,29 @@
-import ProductCrud from '../BL/product.Bl.js'
-import express from 'express';
-import FileUpload from '../middlewar/multerConfig.js';
+import express from "express";
+import ProductCrud from "../BL/product.Bl.js"
+import FileUpload from"../middlewar/multerConfig.js"
+import validateProduct from "../middlewar/ValidateProduct.js"
 
 const router = express.Router();
 
-// Middleware to handle file upload in specific folder
-const uploadMiddleware = FileUpload('uploads/products', ['image/jpeg', 'image/png'], 'image_url', 1, 5);
+// Middleware for file uploads (accepts only JPG/PNG images)
+const uploadMiddleware = FileUpload("uploads/products", ["image/jpeg", "image/png"], "image_url", 1, 5);
 
-// Create a product (with image upload)
-router.post('/', uploadMiddleware, ProductCrud.createProduct);
+// Create a product (with validation & image upload)
+router.post("/", uploadMiddleware, validateProduct, ProductCrud.createProduct);
 
 // Get a product by ID
-router.get('/:id', ProductCrud.getProductById);
+router.get("/:id", ProductCrud.getProductById);
 
-// Get a product by Name
-router.get('/name/:name', ProductCrud.getProductByName);
+// Get a product by SKU
+router.get("/sku/:sku", ProductCrud.getProductBySku);
 
-// Get all products or filtered by category
-router.get('/', ProductCrud.getAllProducts);
+// Get all products (optional category filter)
+router.get("/", ProductCrud.getAllProducts);
 
-// Update product (with image upload)
-router.put('/:id', uploadMiddleware, ProductCrud.updateProduct);
+// Update a product (with validation & image upload)
+router.put("/:id", uploadMiddleware, validateProduct, ProductCrud.updateProduct);
 
-// Delete product by ID
-router.delete('/:id', ProductCrud.removeProduct);
+// Delete a product by ID
+router.delete("/:id", ProductCrud.removeProduct);
 
 export default router;

@@ -1,119 +1,114 @@
-import Product from '../DL/product.dl.js'
-import FileHandler from '../utils/fileHandler.js'
+import Product from '../DL/product.dl.js';
+import FileHandler from '../utils/fileHandler.js';
 
-/**
- * product service:
- * creat
- * update by id (name still the same)
- * remove
- * get all
- * get by id
- * get by name
- */
-const path_to_files = 'uploads/products/'
+const path_to_files = 'uploads/products/';
 
 class ProductCrud {
 
   static async createProduct(req, res) {
-
-    // Ensure product data is valid (basic check)
-    if (!req.body.name) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-    // Trim and lowercase the name to prevent case sensitivity issues
-    const productName = req.body.name.trim().toLowerCase();
-
-    const products_list_Response = await Product.getAll(null, 1, Infinity);
-    const products_list = products_list_Response.products;
-
-    if(products_list.find((product) => productName === product.name)){
-      return res.status(400).json({ error: 'Product already exists' });
-    }
     try {
+      // Check if SKU already exists
+      const existingProduct = await Product.findBySku(req.body.sku);
+      if (existingProduct) {
+        return res.status(400).json({ error: "Product with this SKU already exists" });
+      }
+  
+      // Create new product object
       const product = new Product({
-        name: productName,
-        category: req.body.category,
-        unit: req.body.unit,
-        measure_by_unit: req.body.measure_by_unit,
+        ...req.body,
         image_url: req.file ? path_to_files + req.file.filename : null
       });
-
-      // Create product in DL layer
+  
+      // Create the product
       const newProduct = await Product.create(product);
       res.status(201).json(newProduct);
-
+      
     } catch (error) {
-      console.error('Error creating product:', error);
+      // if the error meaning not found another object with this sku, make the object and return success
+      if (error.kind === "not_found") {
+        // Create new product object
+        const product = new Product({
+          ...req.body,
+          image_url: req.file ? path_to_files + req.file.filename : null
+        });
+    
+        // Create the product
+        const newProduct = await Product.create(product);
+        res.status(201).json(newProduct);
+      } else {
+        console.error("Error creating product:", error);
+      }
       res.status(500).json({ error: error.message });
     }
   }
 
   static async getProductById(req, res) {
     try {
-      const productId = req.params.id;
-      const product = await Product.findById(productId);
+      const product = await Product.findById(req.params.id);
       res.json(product);
     } catch (error) {
       if (error.kind === "not_found") {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: "Product not found" });
       }
-      console.error(`Error fetching product by ID (${req.params.id}):`, error);
+      console.error("Error fetching product by ID:", error);
       res.status(500).json({ error: error.message });
     }
   }
 
-  static async getProductByName(req, res) {
+  static async getProductBySku(req, res) {
     try {
-      const productName = req.params.name;
-      const product = await Product.findByName(productName);
+      const product = await Product.findBySku(req.params.sku.trim().toUpperCase());
       res.json(product);
     } catch (error) {
       if (error.kind === "not_found") {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: "Product not found" });
       }
-      console.error('Error fetching product by name:', error);
+      console.error("Error fetching product by SKU:", error);
       res.status(500).json({ error: error.message });
     }
   }
 
   static async getAllProducts(req, res) {
     try {
-      const category = req.query.category;
-      const page = parseInt(req.query.page) || 1;  // Default to page 1 if not provided
-      const limit = parseInt(req.query.limit) || 10;  // Default to limit 10 if not provided
-  
-      const products = await Product.getAll(category, page, limit);
+      const { category, page = 1, limit = 10 } = req.query;
+      const products = await Product.getAll(category, parseInt(page), parseInt(limit));
       res.json(products);
     } catch (error) {
-      console.error('Error fetching all products:', error);
+      console.error("Error fetching all products:", error);
       res.status(500).json({ error: error.message });
     }
-  }  
+  }
 
-  //update a product. name still the same
   static async updateProduct(req, res) {
     try {
       const productId = req.params.id;
       const existingProduct = await Product.findById(productId);
 
-      // Delete old image if it exists and a new one is uploaded
+      // Delete old image if a new one is uploaded
       if (req.file && existingProduct.image_url) {
         await FileHandler.deleteFile(existingProduct.image_url);
       }
 
-      const updatedProduct = new Product({
-        name: existingProduct.name,
-        category: req.body.category,
-        unit: req.body.unit,
-        measure_by_unit: req.body.measure_by_unit,
-        image_url: req.file ? path_to_files + req.file.filename : null
-      });
+      // If SKU is being changed, check for conflicts
+      if (req.body.sku && req.body.sku !== existingProduct.sku) {
+        const existingProductWithSku = await Product.findBySku(req.body.sku);
+        if (existingProductWithSku && existingProductWithSku.id !== parseInt(productId)) {
+          return res.status(400).json({ error: "Product with this SKU already exists" });
+        }
+      }
+
+      const updatedProduct = {
+        ...req.body,
+        image_url: req.file ? path_to_files + req.file.filename : existingProduct.image_url
+      };
 
       const updated = await Product.update(productId, updatedProduct);
       res.json(updated);
-
     } catch (error) {
-      console.error('Error updating product:', error);
+      if (error.kind === "not_found") {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      console.error("Error updating product:", error);
       res.status(500).json({ error: error.message });
     }
   }
@@ -123,19 +118,17 @@ class ProductCrud {
       const productId = req.params.id;
       const existingProduct = await Product.findById(productId);
 
-      // Delete file if it exists
       if (existingProduct.image_url) {
         await FileHandler.deleteFile(existingProduct.image_url);
       }
 
       await Product.remove(productId);
-      res.json({ message: 'Product deleted successfully' });
-
+      res.json({ message: "Product deleted successfully" });
     } catch (error) {
       if (error.kind === "not_found") {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: "Product not found" });
       }
-      console.error('Error deleting product:', error);
+      console.error("Error deleting product:", error);
       res.status(500).json({ error: error.message });
     }
   }

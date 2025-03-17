@@ -1,17 +1,29 @@
 export const FOOD_CATEGORIES = [
-    "Fruits",
-    "Vegetables",
-    "Dairy",
-    "Meat",
-    "Seafood",
-    "Bakery",
-    "Pantry",
-    "Frozen Foods",
-    "Beverages",
-    "Snacks",
-    "Condiments & Sauces",
-    "Canned Goods",
-    "Organic",
-    "Gluten-Free"
+    "fruits",
+    "vegetables",
+    "dairy",
+    "meat",
+    "seafood",
+    "bakery",
+    "pantry",
+    "frozen foods",
+    "beverages",
+    "snacks",
+    "condiments & sauces",
+    "canned goods",
+    "organic",
+    "gluten-free"
 ];
 
+export const UNITS = [
+    "slice",
+    "cup",
+    "spoon",
+    "tablespoon",
+    "teaspoon",
+    "piece",
+    "gram",
+    "kilogram",
+    "liter",
+    "pack"
+];
