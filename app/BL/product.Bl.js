@@ -1,5 +1,6 @@
 import Product from '../DL/product.dl.js';
 import FileHandler from '../utils/fileHandler.js';
+import MealProduct from '../DL/meal_products.dl.js';
 
 const path_to_files = 'uploads/products/';
 
@@ -38,8 +39,10 @@ class ProductCrud {
       } else {
         console.error("Error creating product:", error);
       }
-      res.status(500).json({ error: error.message });
-    }
+      // Only send error response if not already sent
+      if (!res.headersSent) {
+        return res.status(500).json({ error: error.message });
+      }    }
   }
 
   static async getProductById(req, res) {
@@ -117,7 +120,8 @@ class ProductCrud {
     try {
       const productId = req.params.id;
       const existingProduct = await Product.findById(productId);
-
+      // remove the product from all meals contained in
+      await MealProduct.removeAllByProduct(productId);
       if (existingProduct.image_url) {
         await FileHandler.deleteFile(existingProduct.image_url);
       }

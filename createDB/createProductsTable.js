@@ -17,9 +17,9 @@ const products = [
   { "id": 10, "name": "fish", "sku": "FSH001", "image_url": my_image, "category": FOOD_CATEGORIES[6], "dosage": 1, "unit": "kg", "weight_per_unit": 900, "calories_per_unit": 206, "serving_style": "regular" },
   { "id": 11, "name": "carrot", "sku": "CRT001", "image_url": my_image, "category": FOOD_CATEGORIES[7], "dosage": 1, "unit": "pcs", "weight_per_unit": 61, "calories_per_unit": 25, "serving_style": "regular" },
   { "id": 12, "name": "potato", "sku": "POT001", "image_url": my_image, "category": FOOD_CATEGORIES[7], "dosage": 1, "unit": "pcs", "weight_per_unit": 150, "calories_per_unit": 110, "serving_style": "regular" },
-  { "id": 13, "name": "yogurt", "sku": "YGT001", "image_url": my_image, "category": FOOD_CATEGORIES[1], "dosage": 1, "unit": "cup", "weight_per_unit": 245, "calories_per_unit": 150, "serving_style": "regular" },
+  { "id": 13, "name": "yogurt", "sku": "YGT001", "image_url": my_image, "category": FOOD_CATEGORIES[1], "dosage": 1, "unit": "cup", "weight_per_unit": 245, "calories_per_unit": 150, "serving_style": "ground" },
   { "id": 14, "name": "almonds", "sku": "ALM001", "image_url": my_image, "category": FOOD_CATEGORIES[8], "dosage": 28, "unit": "g", "weight_per_unit": 28, "calories_per_unit": 160, "serving_style": "regular" },
-  { "id": 15, "name": "tomato", "sku": "TMT001", "image_url": my_image, "category": FOOD_CATEGORIES[7], "dosage": 1, "unit": "pcs", "weight_per_unit": 123, "calories_per_unit": 22, "serving_style": "regular" }
+  { "id": 15, "name": "tomato", "sku": "TMT001", "image_url": my_image, "category": FOOD_CATEGORIES[7], "dosage": 1, "unit": "pcs", "weight_per_unit": 123, "calories_per_unit": 22, "serving_style": "ground" }
 ];
 
 const createProductsTable = function () {
@@ -41,8 +41,8 @@ const createProductsTable = function () {
         category VARCHAR(255),              
         dosage INT,                         
         unit VARCHAR(50),                   
-        weight_per_unit INT,                
-        calories_per_unit INT,              
+        weight_per_unit INT NULL,                
+        calories_per_unit INT NULL,              
         serving_style ENUM('ground', 'regular')  
       )`;
 

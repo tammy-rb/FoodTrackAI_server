@@ -140,7 +140,8 @@ class MealCrud {
     try {
       const mealId = req.params.id;
       const existingMeal = await Meal.findById(mealId);
-
+      // remove the meal_products records of this meal
+      await MealProduct.removeAllByMeal(mealId);
       // Delete files if it exists
       if (existingMeal.picture_before) {
         await FileHandler.deleteFile(existingMeal.picture_before);
