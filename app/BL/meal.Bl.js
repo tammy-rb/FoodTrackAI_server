@@ -1,5 +1,7 @@
 import Meal from '../DL/meal.dl.js';
 import FileHandler from '../utils/fileHandler.js';
+import Product from '../DL/product.dl.js';
+import MealProduct from '../DL/meal_products.dl.js';
 
 /**
  * Meal service:
@@ -54,7 +56,12 @@ class MealCrud {
   static async getMealById(req, res) {
     try {
       const mealId = req.params.id;
-      const meal = await Meal.findById(mealId);      
+      const meal = await Meal.findById(mealId);
+      if (!meal) {
+        return res.status(404).json({ error: 'Meal not found' });
+      }
+      // Fetch meal's products names
+      meal.products = await MealCrud.getMealProductsNames(mealId);
       res.json(meal);
     } catch (error) {
       if (error.kind === 'not_found') {
@@ -68,7 +75,15 @@ class MealCrud {
   static async getAllMeals(req, res) {
     try {
       const meals = await Meal.getAll();
-      res.json(meals);
+      // Attach products names to each meal
+      const mealsWithProducts = await Promise.all(
+        meals.map(async (meal) => {
+          meal.products = await MealCrud.getMealProductsNames(meal.id);
+          return meal;
+        })
+      );
+
+      res.json(mealsWithProducts);
     } catch (error) {
       console.error('Error fetching all meals:', error);
       res.status(500).json({ error: error.message });
@@ -144,6 +159,25 @@ class MealCrud {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async getMealProductsNames(mealId) {
+    try {
+      const meal_products = await MealProduct.getAllByMeal(mealId);
+      console.log("meal_products: ", meal_products)
+      const productsNames = await Promise.all(
+        meal_products.map(async (mp) => {
+          const product = await Product.findById(mp.product_id);
+          return product.name;
+        })
+      );
+      console.log("product_names: ", productsNames)
+      return productsNames.filter(name => name !== null);
+    } catch (error) {
+      console.error("Error fetching meal product names:", error);
+      return [];
+    }
+  }
+  
 }
 
 export default MealCrud;
