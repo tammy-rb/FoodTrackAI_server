@@ -54,7 +54,7 @@ class MealCrud {
   static async getMealById(req, res) {
     try {
       const mealId = req.params.id;
-      const meal = await Meal.findById(mealId);
+      const meal = await Meal.findById(mealId);      
       res.json(meal);
     } catch (error) {
       if (error.kind === 'not_found') {

@@ -27,48 +27,71 @@ const mealProducts = [
 ];
 
 const createMealProductsTable = () => {
-  con.connect((err) => {
-    if (err) throw err;
-    console.log("Connected to MySQL");
+  return new Promise((resolve, reject) => {
+    con.connect((err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      console.log("Connected to MySQL");
 
-    // Create meal_products table if it doesn't exist
-    const sqlCreateTable = `CREATE TABLE IF NOT EXISTS meal_products (
-      meal_id INT,
-      product_id INT,
-      weight_before INT,
-      weight_after INT,
-      PRIMARY KEY (meal_id, product_id),
-      FOREIGN KEY (meal_id) REFERENCES meals(id),
-      FOREIGN KEY (product_id) REFERENCES products(id)
-    )`;
+      // Create meal_products table if it doesn't exist
+      const sqlCreateTable = `CREATE TABLE IF NOT EXISTS meal_products (
+        meal_id INT,
+        product_id INT,
+        weight_before INT,
+        weight_after INT,
+        PRIMARY KEY (meal_id, product_id),
+        FOREIGN KEY (meal_id) REFERENCES meals(id),
+        FOREIGN KEY (product_id) REFERENCES products(id)
+      )`;
 
-    con.query(sqlCreateTable, (err) => {
-      if (err) throw err;
-      console.log("meal_products table created or already exists.");
-    });
-
-    // Insert meal product data
-    mealProducts.forEach(mealProduct => {
-      const sqlInsert = `INSERT INTO meal_products (meal_id, product_id, weight_before, weight_after) 
-                         VALUES (?, ?, ?, ?)`;
-
-      con.query(sqlInsert, [
-        mealProduct.meal_id,
-        mealProduct.product_id,
-        mealProduct.weight_before,
-        mealProduct.weight_after
-      ], (err, result) => {
-        if (err) throw err;
-        if (result.affectedRows > 0) {
-          console.log(`Inserted meal product combination: Meal ${mealProduct.meal_id} with Product ${mealProduct.product_id}`);
+      con.query(sqlCreateTable, (err) => {
+        if (err) {
+          reject(err);
+          return;
         }
-      });
-    });
+        console.log("meal_products table created or already exists.");
 
-    // Print meal_products table records
-    con.query("SELECT * FROM meal_products", (err, result) => {
-      if (err) throw err;
-      console.log("meal_products Table Data:", result);
+        // Insert meal product data
+        const insertPromises = mealProducts.map((mealProduct) => {
+          return new Promise((resolve, reject) => {
+            const sqlInsert = `INSERT INTO meal_products (meal_id, product_id, weight_before, weight_after) 
+                               VALUES (?, ?, ?, ?)`;
+
+            con.query(sqlInsert, [
+              mealProduct.meal_id,
+              mealProduct.product_id,
+              mealProduct.weight_before,
+              mealProduct.weight_after
+            ], (err, result) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              if (result.affectedRows > 0) {
+                console.log(`Inserted meal product combination: Meal ${mealProduct.meal_id} with Product ${mealProduct.product_id}`);
+              }
+              resolve();
+            });
+          });
+        });
+
+        // Wait for all inserts to complete
+        Promise.all(insertPromises)
+          .then(() => {
+            // Fetch and display meal_products table records
+            con.query("SELECT * FROM meal_products", (err, result) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              console.log("meal_products Table Data:", result);
+              resolve();
+            });
+          })
+          .catch(reject);
+      });
     });
   });
 };

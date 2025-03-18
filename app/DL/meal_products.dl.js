@@ -19,7 +19,7 @@ class MealProduct {
           return;
         }
         console.log("Created meal_product: ", { id: res.insertId, ...newMealProduct });
-        resolve({ id: res.insertId, ...newMealProduct });
+        resolve({...newMealProduct });
       });
     });
   }

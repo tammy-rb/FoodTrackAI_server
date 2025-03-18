@@ -1,6 +1,6 @@
 import MealProduct from '../DL/meal_products.dl.js'
-import MealCrud from './meal.Bl.js';
-import ProductCrud from './product.Bl.js';
+import Meal from '../DL/meal.dl.js'
+import Product from '../DL/product.dl.js'
 
 /**
  * MealProduct service:
@@ -60,7 +60,7 @@ class MealProductCrud {
         const meal_id = req.params.meal_id;
         
         // Fetch all products without pagination 
-        const products = await ProductCrud.getAll(null, 1, Infinity);
+        const products = await Product.getAll(null, 1, Infinity);
         
         // get all the meal products related to the meal_id as meal_products objects
         const mealProducts = await MealProduct.getAllByMeal(meal_id);
@@ -87,7 +87,7 @@ class MealProductCrud {
         const mealProducts = await MealProduct.getAllByProduct(product_id);
     
         // Retrieve all meals
-        const meals = await MealCrud.getAll();
+        const meals = await Meal.getAll();
     
         // Filter the meals that are associated with the mealProducts
         const associatedMeals = meals.filter(meal =>

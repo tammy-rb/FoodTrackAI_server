@@ -100,48 +100,70 @@ const meals = [
   }
 ];
 
-const createMealsTable = () => {
-  con.connect((err) => {
-    if (err) throw err;
-    console.log("Connected to MySQL");
+const createMealsTable = async function () {
+  return new Promise((resolve, reject) => {
+    con.connect((err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      console.log("Connected to MySQL");
 
-    // Create meals table if not exists 
-    const sqlCreateTable = `CREATE TABLE IF NOT EXISTS meals (
-      id INT PRIMARY KEY AUTO_INCREMENT,
-      description TEXT,
-      picture_before VARCHAR(255),
-      picture_after VARCHAR(255),
-      weight_before INT,
-      weight_after INT
-    )`;
+      // Create meals table if not exists 
+      const sqlCreateTable = `CREATE TABLE IF NOT EXISTS meals (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        description TEXT,
+        picture_before VARCHAR(255),
+        picture_after VARCHAR(255),
+        weight_before INT,
+        weight_after INT
+      )`;
 
-    con.query(sqlCreateTable, (err) => {
-      if (err) throw err;
-      console.log("Meals table created or already exists.");
+      con.query(sqlCreateTable, (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        console.log("Meals table created or already exists.");
 
-      // Insert data into meals table
-      meals.forEach(meal => {
-        const sqlInsert = `INSERT INTO meals (description, picture_before, picture_after, weight_before, weight_after) 
-                           VALUES (?, ?, ?, ?, ?)`;
-
-        con.query(sqlInsert, [
-          meal.description, 
-          meal.picture_before, 
-          meal.picture_after, 
-          meal.weight_before, 
-          meal.weight_after
-        ], (err, result) => {
-          if (err) throw err;
-          if (result.affectedRows > 0) {
-            console.log(`Inserted meal: ${meal.description}`);
-          }
+        // Insert data into meals table
+        const insertPromises = meals.map(meal => {
+          return new Promise((resolve, reject) => {
+            const sqlInsert = `INSERT INTO meals (description, picture_before, picture_after, weight_before, weight_after) 
+                               VALUES (?, ?, ?, ?, ?)`;
+            con.query(sqlInsert, [
+              meal.description,
+              meal.picture_before,
+              meal.picture_after,
+              meal.weight_before,
+              meal.weight_after
+            ], (err, result) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              if (result.affectedRows > 0) {
+                console.log(`Inserted meal: ${meal.description}`);
+              }
+              resolve();
+            });
+          });
         });
-      });
 
-      // Print table records
-      con.query("SELECT * FROM meals", (err, result) => {
-        if (err) throw err;
-        console.log("Meals Table Data:", result);
+        // Wait for all insertions to complete
+        Promise.all(insertPromises)
+          .then(() => {
+            // Print table records
+            con.query("SELECT * FROM meals", (err, result) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              console.log("Meals Table Data:", result);
+              resolve();
+            });
+          })
+          .catch(reject);
       });
     });
   });

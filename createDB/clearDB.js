@@ -6,22 +6,38 @@ import con from "./connection.js"
  * make the db empty withou tables and data
  */
 
-const clearDBTables = function(){
-    con.connect(function(err) {
-      if (err) throw err;
-      con.query("drop table if exists meal_products", function (err, result, fields) {
-        if (err) throw err;
-        console.log("(deleted meal_products table successfully");
+const clearDBTables = () => {
+  return new Promise((resolve, reject) => {
+    con.connect((err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      console.log("Connected to MySQL for table deletion.");
+
+      const tables = ["meal_products", "products", "meals"];
+      const dropTablePromises = tables.map((table) => {
+        return new Promise((resolve, reject) => {
+          con.query(`DROP TABLE IF EXISTS ${table}`, (err, result) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            console.log(`Deleted ${table} table successfully.`);
+            resolve();
+          });
+        });
       });
-      con.query("drop table if exists products", function (err, result, fields) {
-        if (err) throw err;
-        console.log("(deleted products table successfully");
-      });
-      con.query("drop table if exists meals", function (err, result, fields) {
-        if (err) throw err;
-        console.log("(deleted meals table successfully");
-      });
+
+      Promise.all(dropTablePromises)
+        .then(() => {
+          console.log("All tables deleted successfully.");
+          resolve();
+        })
+        .catch(reject);
     });
-}
+  });
+};
 
 export default clearDBTables;

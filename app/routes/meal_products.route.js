@@ -19,7 +19,7 @@ router.get('/product/:product_id/meals', MealProductCrud.getAllMealProductsByPro
 router.put('/:meal_id/:product_id', MealProductCrud.updateMealProduct);
 
 // Remove a specific meal_product by meal_id and product_id
-router.delete('/:meal_id/:product_id', MealProductCrud.removeMealProduct);
+router.delete('/meal-product/:meal_id/:product_id', MealProductCrud.removeMealProduct);
 
 // Remove all meal_products by meal_id
 router.delete('/meal/:meal_id', MealProductCrud.removeAllMealProductsByMeal);

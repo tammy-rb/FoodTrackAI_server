@@ -22,53 +22,81 @@ const products = [
   { "id": 15, "name": "tomato", "sku": "TMT001", "image_url": my_image, "category": FOOD_CATEGORIES[7], "dosage": 1, "unit": "pcs", "weight_per_unit": 123, "calories_per_unit": 22, "serving_style": "regular" }
 ];
 
-const createProductsTable = function() {
-  con.connect(function(err) {
-    if (err) throw err;
+const createProductsTable = function () {
+  return new Promise((resolve, reject) => {
+    con.connect((err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
 
-    var sql = `CREATE TABLE IF NOT EXISTS products (
-      id INT PRIMARY KEY AUTO_INCREMENT,  -- Unique identifier for each product
-      sku VARCHAR(20) NOT NULL UNIQUE,    -- Unique stock-keeping unit (SKU)
-      name VARCHAR(255) NOT NULL,         -- Product name
-      image_url VARCHAR(255),             -- Path to product image
-      category VARCHAR(255),               -- Category (e.g., dairy, fruits, etc.)
-      dosage INT,                         -- Quantity per serving (e.g., 2 slices, 1 cup)
-      unit VARCHAR(50),                   -- Unit of measure (e.g., cup, slice, kg)
-      weight_per_unit INT,                 -- Weight of a single unit in grams
-      calories_per_unit INT,               -- Caloric value per unit
-      serving_style ENUM('ground', 'regular')  -- Serving style (ground or regular)
-    )`;
+      console.log("Connected to MySQL");
 
-    con.query(sql, function(err, result) {
-      if (err) throw err;
-      console.log("Products table created or already exists.");
-    });
+      // Create products table if not exists
+      const sqlCreateTable = `CREATE TABLE IF NOT EXISTS products (
+        id INT PRIMARY KEY AUTO_INCREMENT,  
+        sku VARCHAR(20) NOT NULL UNIQUE,    
+        name VARCHAR(255) NOT NULL,         
+        image_url VARCHAR(255),             
+        category VARCHAR(255),              
+        dosage INT,                         
+        unit VARCHAR(50),                   
+        weight_per_unit INT,                
+        calories_per_unit INT,              
+        serving_style ENUM('ground', 'regular')  
+      )`;
 
-    products.forEach(product => {
-      var sql = `INSERT INTO products (id, sku, name, image_url, category, dosage, unit, weight_per_unit, calories_per_unit, serving_style) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-      con.query(sql, [
-        product.id,
-        product.sku,
-        product.name,
-        product.image_url,
-        product.category,
-        product.dosage,
-        product.unit,
-        product.weight_per_unit,
-        product.calories_per_unit,
-        product.serving_style
-      ], function(err, result) {
-        if (err) throw err;
-        if (result.affectedRows > 0) {
-          console.log(`Inserted product: ${product.name} (SKU: ${product.sku})`);
+      con.query(sqlCreateTable, (err) => {
+        if (err) {
+          reject(err);
+          return;
         }
-      });
-    });
+        console.log("Products table created or already exists.");
 
-    con.query("SELECT * FROM products", function(err, result) {
-      if (err) throw err;
-      console.log("Products Table Data:", result);
+        // Insert data into products table
+        const insertPromises = products.map(product => {
+          return new Promise((resolve, reject) => {
+            const sqlInsert = `INSERT INTO products (id, sku, name, image_url, category, dosage, unit, weight_per_unit, calories_per_unit, serving_style) 
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            con.query(sqlInsert, [
+              product.id,
+              product.sku,
+              product.name,
+              product.image_url,
+              product.category,
+              product.dosage,
+              product.unit,
+              product.weight_per_unit,
+              product.calories_per_unit,
+              product.serving_style
+            ], (err, result) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              if (result.affectedRows > 0) {
+                console.log(`Inserted product: ${product.name} (SKU: ${product.sku})`);
+              }
+              resolve();
+            });
+          });
+        });
+
+        // Wait for all insert operations to complete
+        Promise.all(insertPromises)
+          .then(() => {
+            // Fetch and display table records
+            con.query("SELECT * FROM products", (err, result) => {
+              if (err) {
+                reject(err);
+                return;
+              }
+              console.log("Products Table Data:", result);
+              resolve();
+            });
+          })
+          .catch(reject);
+      });
     });
   });
 };
