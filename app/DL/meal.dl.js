@@ -45,20 +45,46 @@ class Meal {
     });
   }
 
-  // Get all meals
-  static getAll() {
+  // Get all meals with pagination
+  static getAll(page = 1, limit = 10) {
     return new Promise((resolve, reject) => {
-      sql.query("SELECT * FROM meals", (err, res) => {
+      let query = "SELECT * FROM meals";
+      
+      if (limit != Infinity) {
+        const offset = (page - 1) * limit;
+        query += ` LIMIT ${limit} OFFSET ${offset}`;
+      }
+
+      sql.query(query, (err, meals) => {
         if (err) {
           console.log("error: ", err);
           reject(err);
           return;
         }
-        console.log("Meals: ", res);
-        resolve(res);
+
+        // Get the total count of meals for pagination
+        const countQuery = "SELECT COUNT(*) AS total FROM meals";
+        sql.query(countQuery, (err, countResult) => {
+          if (err) {
+            console.log("error: ", err);
+            reject(err);
+            return;
+          }
+
+          const total = countResult[0].total;
+          const totalPages = Math.ceil(total / limit);
+
+          resolve({
+            meals,
+            page,
+            totalPages,
+            total
+          });
+        });
       });
     });
   }
+
 
   // Update a meal
   static update(id, meal) {

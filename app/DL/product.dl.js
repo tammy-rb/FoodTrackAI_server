@@ -81,7 +81,7 @@ class Product {
         query += ` LIMIT ${limit} OFFSET ${offset}`;
       }
   
-      sql.query(query, (err, products) => {
+      sql.query(query, (err, items) => {
         if (err) {
           console.log("error: ", err);
           reject(err);
@@ -105,7 +105,7 @@ class Product {
           const totalPages = Math.ceil(total / limit);
   
           resolve({
-            products,
+            items,
             page,
             totalPages,
             total

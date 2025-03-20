@@ -74,7 +74,9 @@ class MealCrud {
 
   static async getAllMeals(req, res) {
     try {
-      const meals = await Meal.getAll();
+      const { page = 1, limit = 10 } = req.query;
+      const { meals, totalPages, total } = await Meal.getAll(parseInt(page), parseInt(limit));
+  
       // Attach products names to each meal
       const mealsWithProducts = await Promise.all(
         meals.map(async (meal) => {
@@ -82,14 +84,19 @@ class MealCrud {
           return meal;
         })
       );
-
-      res.json(mealsWithProducts);
+  
+      res.json({
+        items: mealsWithProducts,
+        page: parseInt(page),
+        totalPages,
+        total
+      });
     } catch (error) {
-      console.error('Error fetching all meals:', error);
+      console.error('Error fetching all meals with pagination:', error);
       res.status(500).json({ error: error.message });
     }
   }
-
+  
   static async updateMeal(req, res) {
     try {
       const mealId = req.params.id;

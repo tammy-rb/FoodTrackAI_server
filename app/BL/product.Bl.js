@@ -91,10 +91,17 @@ class ProductCrud {
       if (req.file && existingProduct.image_url) {
         await FileHandler.deleteFile(existingProduct.image_url);
       }
-
+      let existingProductWithSku;
       // If SKU is being changed, check for conflicts
       if (req.body.sku && req.body.sku !== existingProduct.sku) {
-        const existingProductWithSku = await Product.findBySku(req.body.sku);
+        try{
+           existingProductWithSku = await Product.findBySku(req.body.sku);
+        }
+        catch(err){
+          if(err.kind !== "not_found"){
+            console.error("Error updating product:", error);
+            res.status(500).json({ error: error.message });
+          }}
         if (existingProductWithSku && existingProductWithSku.id !== parseInt(productId)) {
           return res.status(400).json({ error: "Product with this SKU already exists" });
         }
