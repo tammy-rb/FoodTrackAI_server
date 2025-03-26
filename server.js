@@ -17,7 +17,7 @@ app.use(express.static('public'));
 
 // Enable CORS for only the website client at http://localhost:3000
 const corsOptions = {
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "http://localhost:3001"],
     credentials: true,
 };
 app.use(cors(corsOptions));

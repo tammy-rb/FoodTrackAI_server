@@ -17,7 +17,7 @@ class MealProductCrud {
   static async createMealProduct(req, res) {
     try {
       // Ensure required fields are provided
-      if (!req.body.meal_id || !req.body.product_id || !req.body.weight_before || !req.body.weight_after) {
+      if (!req.body.meal_id || !req.body.product_id) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
@@ -66,7 +66,7 @@ class MealProductCrud {
         const mealProducts = await MealProduct.getAllByMeal(meal_id);
     
         // Filter the products to only include those that match the meal products
-        const filteredProducts = products.products.filter(product =>
+        const filteredProducts = products.items.filter(product =>
             mealProducts.some(mealProduct => mealProduct.product_id === product.id)
         );
     
@@ -90,7 +90,7 @@ class MealProductCrud {
         const meals = await Meal.getAll();
     
         // Filter the meals that are associated with the mealProducts
-        const associatedMeals = meals.filter(meal =>
+        const associatedMeals = meals.meals.filter(meal =>
             mealProducts.some(mealProduct => mealProduct.meal_id === meal.id)
         );
     
