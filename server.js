@@ -43,8 +43,8 @@ app.use((req, res, next) => {
 
 initRoute(app);
 app.use('/products', productRoute);
-app.use('/meals', mealRoute);
-app.use('/meals-products', mealProductRoute);
+//app.use('/meals', mealRoute);
+//app.use('/meals-products', mealProductRoute);
 
 // Define a simple GET route
 app.get("/", (req, res) => {
